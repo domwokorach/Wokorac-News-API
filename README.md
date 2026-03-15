@@ -1,6 +1,33 @@
-# Wokorac-News-API
+# Wokorach-News-API
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite news app that fetches headlines from NewsAPI.
+
+## Why a proxy is required
+
+NewsAPI requests made **directly from the browser** are often blocked (CORS / plan restrictions) and exposing your API key in client-side code is unsafe.
+
+This repo uses a `/api/top-headlines` proxy so the API key stays server-side:
+
+- **Local dev:** Vite proxies `/api/*` to `https://newsapi.org/*` (see `vite.config.js`).
+- **Production (Vercel):** a serverless function at `api/top-headlines.js` calls NewsAPI using `NEWS_API_KEY`.
+
+## Setup
+
+Create a `.env` file for local development:
+
+```bash
+# used only by the Vercel function / production; for local dev via Vite proxy you can still set it for parity
+NEWS_API_KEY=your_newsapi_key_here
+```
+
+If you previously committed/exposed a key, rotate it in your NewsAPI dashboard.
+
+## Run
+
+```bash
+npm install
+npm run dev
+```
 
 Currently, two official plugins are available:
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsAPI Proxy Test</title>
+    <style>
+        body { font-family: system-ui; max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; background: #3882F6; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #2563eb; }
+        pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; }
+        .error { color: #dc2626; background: #fee; border: 2px solid #dc2626; }
+        .success { color: #059669; background: #d1fae5; border: 2px solid #059669; }
+    </style>
+</head>
+<body>
+    <h1>🧪 NewsAPI Proxy Test</h1>
+    <p>Testing: <code id="url"></code></p>
+    <button onclick="testProxy()">Test /api/top-headlines</button>
+    <div id="result"></div>
+
+    <script>
+        const baseUrl = window.location.origin;
+        const testUrl = `${baseUrl}/api/top-headlines?country=us&category=general`;
+        document.getElementById('url').textContent = testUrl;
+
+        async function testProxy() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>⏳ Fetching...</p>';
+
+            try {
+                const res = await fetch(testUrl, {
+                    headers: { accept: 'application/json' }
+                });
+
+                const text = await res.text();
+                let json;
+                try {
+                    json = JSON.parse(text);
+                } catch {}
+
+                const statusClass = res.ok ? 'success' : 'error';
+                const statusEmoji = res.ok ? '✅' : '❌';
+                
+                resultDiv.innerHTML = `
+                    <h2>${statusEmoji} Response</h2>
+                    <p><strong>Status:</strong> ${res.status} ${res.statusText}</p>
+                    <p><strong>Content-Type:</strong> ${res.headers.get('content-type')}</p>
+                    <h3>Body:</h3>
+                    <pre class="${statusClass}">${json ? JSON.stringify(json, null, 2) : text}</pre>
+                    ${json?.status === 'ok' ? `<p>✅ SUCCESS: ${json.totalResults} articles found</p>` : ''}
+                    ${json?.status === 'error' ? `<p>❌ NewsAPI Error: ${json.code} - ${json.message}</p>` : ''}
+                `;
+            } catch (err) {
+                resultDiv.innerHTML = `
+                    <h2>❌ Network Error</h2>
+                    <pre class="error">${err.message}</pre>
+                `;
+            }
+        }
+
+        // Auto-run on load
+        testProxy();
+    </script>
+</body>
+</html>
